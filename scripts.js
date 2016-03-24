@@ -11,30 +11,58 @@ $(document).ready(function(){
 		imgBaseURL = configData.images.base_url;
 	});
 
-	// add an initial set of 'now playing' movies to the poster grid
-	
+	// get a list of genres from themoviedb
+	var genres = [];
+	var genreURL = baseURL + 'genre/movie/list' + apiKey;
+	$.getJSON(genreURL, function(genreData) {
+		var newHTML = '';
+		$(genreData.genres).each(function(){
+			// make a filter button for each genre name
+			var currGenre = this.name;
+			newHTML += '<input id="' + currGenre.toLowerCase() + '-filter" type="button" class="btn btn-default" value="' + currGenre + '">';
+			// add genre names and IDs to an array 
+			genres.push(this);
+		});
+		$('#genre-filters').html(newHTML);
+		console.log(genres);
+	});
+
+	// on page load, add 'now playing' movies to the poster grid
 	$.getJSON(nowPlaying, function(movieData) {
 		var newHTML = '';
 		$(movieData.results).each(function(){
 			var currentPoster = imgBaseURL + 'w300' + this.poster_path;
 			titles.push(this.title);
-			newHTML += '<div class="col-sm-3"><img src="' + currentPoster + '">' + '</div>';
+			newHTML += '<div class="now-playing col-sm-3"><img src="' + currentPoster + '">' + '</div>';
 		});
 		$('#poster-grid').html(newHTML);
+		// keep isotope from running until we have movies to work with
+		//getIsotope();
 	});
 
 	// search all the movies via typeahead...
 	// add event listener on keyup event that sends what you have typed into the AXAJ call
-	/* var searchAllURL = baseURL + "search/keyword" + apiKey + "&query=" + "&page=1";
-	console.log(searchAllURL);
-	$.getJSON(searchAllURL, function(allData) {
-		$(allData.results).each(function(){
-			allTitles.push(this.title);
+	/* 
+	$('#search-str').keyup(function(){
+		var mySearchString = $('#search-str').val();
+		var searchAllURL = baseURL + "search/keyword" + apiKey + "&query=" + mySearchString + "&page=1";
+		console.log(searchAllURL);
+		$.getJSON(searchAllURL, function(allData) {
+			$(allData.results).each(function(){
+				allTitles.push(this.title);
+			});
 		});
-	}); */
+	});
+	*/
 
-	// pull up a specific movie poster upon clicking the search button
-	$('#search').submit(function(){
+	$('#comedy-filter').click(function(){
+		$('#poster-grid').isotope({ filter: '.comedy' })
+	});
+
+	// pull up a specific movie poster upon clicking the search button;
+	// you could also run all of this stuff when the search option changes;
+	// use $('#search-by').change(function()...)
+	$('#search-form').submit(function(){
 		// first get the search option (movie/tv/person) from select element
 		var searchOption = $('#search-by option:selected').val();
 		var newTitles = [];
@@ -46,11 +74,12 @@ $(document).ready(function(){
 			$(titleData.results).each(function(){
 				if (searchOption == 'person') {
 					newTitles.push(this.name);
-					newHTML += "<div class='movie-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.profile_path + "'></div>";
+					newHTML += "<div class='person-profile col-sm-3'><img src=" + imgBaseURL + "w300" + this.profile_path + "'></div>";
 				} else if (searchOption == 'tv') {
 					newTitles.push(this.name);
-					newHTML += "<div class='movie-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
-				} else {
+					newHTML += "<div class='tv-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
+				}
+				else {
 					newTitles.push(this.title);
 					newHTML += "<div class='movie-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
 				}
@@ -73,6 +102,13 @@ $(document).ready(function(){
 
 		event.preventDefault();
 	});
+
+	function getIsotope() {
+		$('#poster-grid').isotope({
+			itemSelector: '.now-playing',
+			layoutMode: 'fitRows'
+		});
+	}
 
 	// this is typeahead.js stuff
 	var substringMatcher = function(strs) {
@@ -97,7 +133,7 @@ $(document).ready(function(){
 	$('.typeahead').typeahead({
 	  hint: true,
 	  highlight: true,
-	  minLength: 1
+	  minLength: 2
 	},
 	{
 	  name: 'titles',
