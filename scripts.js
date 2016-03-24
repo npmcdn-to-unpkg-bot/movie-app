@@ -35,86 +35,44 @@ $(document).ready(function(){
 
 	// pull up a specific movie poster upon clicking the search button
 	$('#search').submit(function(){
-		// first get the search option from select element
+		// first get the search option (movie/tv/person) from select element
 		var searchOption = $('#search-by option:selected').val();
+		var newTitles = [];
+		var searchTitle = $('#search-str').val();
+		var titleURL = baseURL + 'search/' + searchOption + apiKey + '&query=' + encodeURI(searchTitle) + '&page=1';
+		newHTML = '';
 
-		if (searchOption == 'movie') {
-			var newTitles = [];
-			var searchTitle = $('#search-str').val();
-			var titleURL = baseURL + 'search/' + searchOption + apiKey + '&query=' + encodeURI(searchTitle) + '&page=1';
-			newHTML = '';
-			$.getJSON(titleURL, function(titleData){
-				$(titleData.results).each(function(){
-					newTitles.push(this.title);
-					newHTML += "<div class='movie-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
-				});
-				$('#poster-grid').html(newHTML);
-			});
-			// kill the old typehead instance because it has old data
-			$('.typeahead').typeahead('destroy');
-			// the new typeahead instance is not getting created
-			$('.typeahead').typeahead({
-			  hint: true,
-			  highlight: true,
-			  minLength: 1
-			},
-			{
-			  name: 'newTitles',
-			  source: substringMatcher(newTitles)
-			});
-
-		} else if (searchOption == 'tv') {
-			var newTitles = [];
-			var searchTitle = $('#search-str').val();
-			var titleURL = baseURL + 'search/' + searchOption + apiKey + '&query=' + encodeURI(searchTitle) + '&page=1';
-			newHTML = '';
-			$.getJSON(titleURL, function(titleData){
-				$(titleData.results).each(function(){
+		$.getJSON(titleURL, function(titleData){
+			$(titleData.results).each(function(){
+				if (searchOption == 'person') {
+					newTitles.push(this.name);
+					newHTML += "<div class='movie-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.profile_path + "'></div>";
+				} else if (searchOption == 'tv') {
 					newTitles.push(this.name);
 					newHTML += "<div class='movie-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
-				});
-				$('#poster-grid').html(newHTML);
+				} else {
+					newTitles.push(this.title);
+					newHTML += "<div class='movie-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
+				}
 			});
-			// kill the old typehead instance because it has old data
-			$('.typeahead').typeahead('destroy');
-			// the new typeahead instance is not getting created
-			$('.typeahead').typeahead({
-			  hint: true,
-			  highlight: true,
-			  minLength: 1
-			},
-			{
-			  name: 'newTitles',
-			  source: substringMatcher(newTitles)
-			});
-		} else if (searchOption == 'person') {
-			var persons = [];
-			var searchPerson = $('#search-str').val();
-			var personURL = baseURL + 'search/person' + apiKey + '&query=' + encodeURI(searchPerson) + '&page=1';
-			newHTML = '';
-			$.getJSON(personURL, function(personData){
-				$(personData.results).each(function(){
-					persons.push(this.name);
-					newHTML += "<div class=' movie-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.profile_path + "'></div>";
-				});
-				$('#poster-grid').html(newHTML);
-			});
-			// kill the old typehead instance because it has old data
-			$('.typeahead').typeahead('destroy');
-			// the new typeahead instance is not getting created
-			$('.typeahead').typeahead({
-			  hint: true,
-			  highlight: true,
-			  minLength: 1
-			},
-			{
-			  name: 'persons',
-			  source: substringMatcher(persons)
-			});
-		}
+			$('#poster-grid').html(newHTML);
+		});
+
+		// kill the old typeahead instance because it has 'now playing' titles
+		$('.typeahead').typeahead('destroy');
+		// initialize typeahead again with the new titles
+		$('.typeahead').typeahead({
+		  hint: true,
+		  highlight: true,
+		  minLength: 1
+		},
+		{
+		  name: 'newTitles',
+		  source: substringMatcher(newTitles)
+		});
+
 		event.preventDefault();
 	});
-
 
 	// this is typeahead.js stuff
 	var substringMatcher = function(strs) {
