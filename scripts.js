@@ -11,7 +11,7 @@ $(document).ready(function(){
 		imgBaseURL = configData.images.base_url;
 	});
 
-	// get a list of genres from themoviedb
+	// get a list of genres from movie genre list endpoint
 	var genres = [];
 	var genreURL = baseURL + 'genre/movie/list' + apiKey;
 	$.getJSON(genreURL, function(genreData) {
@@ -19,8 +19,8 @@ $(document).ready(function(){
 		$(genreData.genres).each(function(){
 			// make a filter button for each genre name
 			var currGenre = this.name;
-			newHTML += '<input id="' + currGenre.toLowerCase() + '-filter" type="button" class="btn btn-default" value="' + currGenre + '">';
-			// add genre names and IDs to an array 
+			newHTML += '<input id="' + currGenre.toLowerCase() + '-filter" type="button" class="btn btn-default genre-btn" value="' + currGenre + '">';
+			// add genre names and IDs to an array for correlation purposes later
 			genres.push(this);
 		});
 		$('#genre-filters').html(newHTML);
@@ -33,17 +33,37 @@ $(document).ready(function(){
 		$(movieData.results).each(function(){
 			var currentPoster = imgBaseURL + 'w300' + this.poster_path;
 			titles.push(this.title);
-			newHTML += '<div class="now-playing col-sm-3"><img src="' + currentPoster + '">' + '</div>';
+			newHTML += '<div class="now-playing ';
+			// add genre classes to each poster
+			for (i=0; i<this.genre_ids.length; i++) {
+				var currID = this.genre_ids[i];
+				newHTML += 'genre' + currID + ' ';
+				/* for (j=0; j<genres.length; j++) {
+					if (this.genre_ids[i] == genres[j].id) {
+						var genreClass = genres[j].name;
+					}
+				} */
+			}
+			newHTML += 'col-sm-3"><img src="' + currentPoster + '">' + '</div>';
 		});
 		$('#poster-grid').html(newHTML);
-		// keep isotope from running until we have movies to work with
-		//getIsotope();
+		// initialize typeahead and isotope once we have some movies to work with
+		getTypeahead();
+		getIsotope('.now-playing');
+
+		// add event listener on genre buttons
+		$('.genre-btn').click(function() {
+			var thisGenre = $(this).val();
+			console.log(thisGenre);
+			if (thisGenre == 'Comedy') {
+				$('#poster-grid').isotope({ filter: '.genre35' })
+			}
+		});
 	});
 
 	// search all the movies via typeahead...
 	// add event listener on keyup event that sends what you have typed into the AXAJ call
-	/* 
-	$('#search-str').keyup(function(){
+	/* $('#search-str').keyup(function(){
 		var mySearchString = $('#search-str').val();
 		var searchAllURL = baseURL + "search/keyword" + apiKey + "&query=" + mySearchString + "&page=1";
 		console.log(searchAllURL);
@@ -52,12 +72,11 @@ $(document).ready(function(){
 				allTitles.push(this.title);
 			});
 		});
-	});
-	*/
+	}); */
 
-	$('#comedy-filter').click(function(){
-		$('#poster-grid').isotope({ filter: '.comedy' })
-	});
+	/* $('#comedy-filter').click(function(){
+		$('#poster-grid').isotope({ filter: '.genre35' })
+	}); */
 
 	// pull up a specific movie poster upon clicking the search button;
 	// you could also run all of this stuff when the search option changes;
@@ -100,13 +119,25 @@ $(document).ready(function(){
 		  source: substringMatcher(newTitles)
 		});
 
+		if (searchOption == 'person') {
+			getIsotope('.person-profile');
+		} else if (searchOption == 'tv') {
+			getIsotope('.tv-poster');
+		} else {
+			getIsotope('.movie-poster');
+		}
+
 		event.preventDefault();
 	});
 
-	function getIsotope() {
-		$('#poster-grid').isotope({
-			itemSelector: '.now-playing',
+	function getIsotope(selector) {
+		var $grid = $('#poster-grid').isotope({
+			itemSelector: selector,
 			layoutMode: 'fitRows'
+		});
+		// layout Isotope after each image loads
+		$grid.imagesLoaded().progress( function() {
+		  $grid.isotope('layout');
 		});
 	}
 
@@ -129,15 +160,16 @@ $(document).ready(function(){
 	  };
 	};
 
-	// initialize typeahead
-	$('.typeahead').typeahead({
-	  hint: true,
-	  highlight: true,
-	  minLength: 2
-	},
-	{
-	  name: 'titles',
-	  source: substringMatcher(titles)
-	});
+	function getTypeahead() {
+		$('.typeahead').typeahead({
+		  hint: true,
+		  highlight: true,
+		  minLength: 2
+		},
+		{
+		  name: 'titles',
+		  source: substringMatcher(titles)
+		});
+	}
 
 });
