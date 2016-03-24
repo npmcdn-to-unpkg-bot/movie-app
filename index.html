@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Top Movies</title>
+	<title>Movie Crawler</title>
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-
-	<!-- Optional theme -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
 
 	<link rel="stylesheet" type="text/css" href="css/style.css">
 
@@ -15,14 +12,17 @@
 <div class="container">
 	<div class="row">
 		<div class="col-sm-12 text-center">
-			<form id="search">
-				<input id="search-str" type="text" class="typeahead" placeholder="Search for...">
-				<input type="submit" class="btn btn-primary" value="search">
-				<select>
-					<option value="">Here is an option</option>
-					<option value="">Here is an option</option>
-				</select>
-			</form>
+			<div class="form-wrapper">
+				<form id="search">
+					<input id="search-str" type="text" class="typeahead" placeholder="Search for a...">
+					<select id="search-by">
+						<option option="selected" value="movie">Movie</option>
+						<option value="tv">TV Show</option>
+						<option value="person">Person</option>
+					</select>
+					<input type="submit" class="btn btn-primary" value="Search">
+				</form>
+			</div>
 		</div>
 	</div>
 	<div class="row">
