@@ -38,7 +38,7 @@ $(document).ready(function(){
 		// first get the search option from select element
 		var searchOption = $('#search-by option:selected').val();
 
-		if (searchOption == 'movie' || searchOption == 'tv') {
+		if (searchOption == 'movie') {
 			var newTitles = [];
 			var searchTitle = $('#search-str').val();
 			var titleURL = baseURL + 'search/' + searchOption + apiKey + '&query=' + encodeURI(searchTitle) + '&page=1';
@@ -63,6 +63,30 @@ $(document).ready(function(){
 			  source: substringMatcher(newTitles)
 			});
 
+		} else if (searchOption == 'tv') {
+			var newTitles = [];
+			var searchTitle = $('#search-str').val();
+			var titleURL = baseURL + 'search/' + searchOption + apiKey + '&query=' + encodeURI(searchTitle) + '&page=1';
+			newHTML = '';
+			$.getJSON(titleURL, function(titleData){
+				$(titleData.results).each(function(){
+					newTitles.push(this.name);
+					newHTML += "<div class='movie-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
+				});
+				$('#poster-grid').html(newHTML);
+			});
+			// kill the old typehead instance because it has old data
+			$('.typeahead').typeahead('destroy');
+			// the new typeahead instance is not getting created
+			$('.typeahead').typeahead({
+			  hint: true,
+			  highlight: true,
+			  minLength: 1
+			},
+			{
+			  name: 'newTitles',
+			  source: substringMatcher(newTitles)
+			});
 		} else if (searchOption == 'person') {
 			var persons = [];
 			var searchPerson = $('#search-str').val();
@@ -121,4 +145,5 @@ $(document).ready(function(){
 	  name: 'titles',
 	  source: substringMatcher(titles)
 	});
+
 });
