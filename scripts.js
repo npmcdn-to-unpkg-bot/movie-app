@@ -7,8 +7,6 @@ $(document).ready(function(){
 	var configURL = baseURL + 'configuration' + apiKey;
 	var nowPlaying = baseURL + 'movie/now_playing' + apiKey;
 	var allTitles = [];
-	//var searchAllURL = baseURL + "search/movie" + apiKey + "&query=" + "&page=1";
-	var searchAllURL = baseURL + "movie/id" + apiKey;
 
 	// this is typeahead.js stuff
 	var substringMatcher = function(strs) {
@@ -61,26 +59,43 @@ $(document).ready(function(){
 	});
 
 	// search all the movies via typeahead...
+	// add event listener on keyup event that sends what you have typed into the AXAJ call
+	/* var searchAllURL = baseURL + "search/keyword" + apiKey + "&query=" + "&page=1";
 	console.log(searchAllURL);
 	$.getJSON(searchAllURL, function(allData) {
 		$(allData.results).each(function(){
 			allTitles.push(this.title);
 		});
-	});
+	}); */
 
 	// pull up a specific movie poster upon clicking the search button
-	$("#search").submit(function(){
-		var searchTitle = $("#search-str").val();
-		console.log(searchTitle);
-		var movieSearchURL = baseURL + "search/movie" + apiKey + "&query=" + encodeURI(searchTitle) + "&page=1";
-		newHTML = '';
-		$.getJSON(movieSearchURL, function(movieData){
-			var movieImage = movieData.results;
-			$(movieData.results).each(function(){
-				newHTML += "<div class=' movie-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
+	$('#search').submit(function(){
+		// first get the search option from select element
+		var searchOption = $('#search-by option:selected').val();
+
+		if (searchOption == 'movie' || searchOption == 'tv') {
+			var searchTitle = $('#search-str').val();
+			var titleURL = baseURL + 'search/' + searchOption + apiKey + '&query=' + encodeURI(searchTitle) + '&page=1';
+			newHTML = '';
+			$.getJSON(titleURL, function(titleData){
+				$(titleData.results).each(function(){
+					newHTML += "<div class=' movie-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
+				});
+				$('#poster-grid').html(newHTML);
 			});
-			$("#poster-grid").html(newHTML);
-		});
+		} else if (searchOption == 'person') {
+			var searchPerson = $('#search-str').val();
+			var personURL = baseURL + 'search/person' + apiKey + '&query=' + encodeURI(searchPerson) + '&page=1';
+			newHTML = '';
+			$.getJSON(personURL, function(personData){
+				$(personData.results).each(function(){
+					newHTML += "<div class=' movie-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.profile_path + "'></div>";
+				});
+				$('#poster-grid').html(newHTML);
+			});
+		}
+
 		event.preventDefault();
 	});
+
 });
