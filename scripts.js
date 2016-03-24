@@ -47,7 +47,7 @@ $(document).ready(function(){
 
 		// initialize typeahead and isotope once we have some movies to work with
 		getTypeahead();
-		getIsotope('.poster');
+		getIsotope();
 
 		// add event listener on genre buttons
 		$('.genre-btn').click(function() {
@@ -92,13 +92,16 @@ $(document).ready(function(){
 		$.getJSON(titleURL, function(titleData){
 			$(titleData.results).each(function(){
 				if (searchOption == 'person') {
+					$('#info').html("Persons of Interest");
 					newTitles.push(this.name);
 					newHTML += "<div class='poster person-profile col-sm-3'><img src=" + imgBaseURL + "w300" + this.profile_path + "'></div>";
 				} else if (searchOption == 'tv') {
+					$('#info').html("TV Shows");
 					newTitles.push(this.name);
 					newHTML += "<div class='poster tv-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
 				}
 				else {
+					$('#info').html("Movies");
 					newTitles.push(this.title);
 					newHTML += "<div class='poster movie-poster ";
 					for (i=0; i<this.genre_ids.length; i++) {
@@ -123,31 +126,19 @@ $(document).ready(function(){
 		  name: 'newTitles',
 		  source: substringMatcher(newTitles)
 		});
-		
-		// destroy old isotope instance
-
-		// create new isotope instance
-		/* if (searchOption == 'person') {
-			getIsotope('.person-profile');
-		} else if (searchOption == 'tv') {
-			getIsotope('.tv-poster');
-		} else {
-			getIsotope('.movie-poster');
-			console.log('i created a new isotope');
-		} */
-
-		// prevent page from reloading on enter
+	
+		// prevent page from reloading on return or enter
 		event.preventDefault();
 	});
 
-	function getIsotope(selector) {
+	function getIsotope() {
 		$grid = $('#poster-grid').isotope({
-			itemSelector: selector,
-			layoutMode: 'fitRows'
+			itemSelector: '.poster',
+			layoutMode: 'masonry'
 		});
 		// layout Isotope after each image loads
 		$grid.imagesLoaded().progress( function() {
-		  $grid.isotope('layout');
+			$grid.isotope('layout');
 		});
 	}
 
