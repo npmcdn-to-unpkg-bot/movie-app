@@ -1,4 +1,5 @@
 $(document).ready(function(){
+	var $grid = '';
 	var titles = [];
 	var imgBaseURL;
 	var baseURL = "https://api.themoviedb.org/3/";
@@ -18,46 +19,45 @@ $(document).ready(function(){
 		var newHTML = '';
 		$(genreData.genres).each(function(){
 			// make a filter button for each genre name
-			var currGenre = this.name;
-			newHTML += '<input id="' + currGenre.toLowerCase() + '-filter" type="button" class="btn btn-default genre-btn" value="' + currGenre + '">';
+			var genreID = this.id;
+			var genreName = this.name;
+			newHTML += '<input id="' + genreName.toLowerCase() + '-filter" type="button" class="btn btn-default genre-btn" value="' + genreName + '">';
 			// add genre names and IDs to an array for correlation purposes later
-			genres.push(this);
+			genres[genreID] = genreName;
 		});
 		$('#genre-filters').html(newHTML);
-		console.log(genres);
 	});
 
-	// on page load, add 'now playing' movies to the poster grid
+	// start off with a set of now playing movies until search is used
 	$.getJSON(nowPlaying, function(movieData) {
 		var newHTML = '';
 		$(movieData.results).each(function(){
 			var currentPoster = imgBaseURL + 'w300' + this.poster_path;
 			titles.push(this.title);
-			newHTML += '<div class="now-playing ';
+			newHTML += '<div class="poster now-playing ';
 			// add genre classes to each poster
 			for (i=0; i<this.genre_ids.length; i++) {
 				var currID = this.genre_ids[i];
-				newHTML += 'genre' + currID + ' ';
-				/* for (j=0; j<genres.length; j++) {
-					if (this.genre_ids[i] == genres[j].id) {
-						var genreClass = genres[j].name;
-					}
-				} */
+				newHTML += genres[currID] + ' ';
 			}
 			newHTML += 'col-sm-3"><img src="' + currentPoster + '">' + '</div>';
 		});
+
 		$('#poster-grid').html(newHTML);
+
 		// initialize typeahead and isotope once we have some movies to work with
 		getTypeahead();
-		getIsotope('.now-playing');
+		getIsotope('.poster');
 
 		// add event listener on genre buttons
 		$('.genre-btn').click(function() {
+			// get rid of old filters
+			$grid.isotope({ filter: '*' });
+			// tell isotope that the posters may have changed since it was last loaded
+			$grid.isotope('reloadItems')
+			// then apply the filter
 			var thisGenre = $(this).val();
-			console.log(thisGenre);
-			if (thisGenre == 'Comedy') {
-				$('#poster-grid').isotope({ filter: '.genre35' })
-			}
+			$grid.isotope({ filter: '.' + thisGenre })
 		});
 	});
 
@@ -93,14 +93,19 @@ $(document).ready(function(){
 			$(titleData.results).each(function(){
 				if (searchOption == 'person') {
 					newTitles.push(this.name);
-					newHTML += "<div class='person-profile col-sm-3'><img src=" + imgBaseURL + "w300" + this.profile_path + "'></div>";
+					newHTML += "<div class='poster person-profile col-sm-3'><img src=" + imgBaseURL + "w300" + this.profile_path + "'></div>";
 				} else if (searchOption == 'tv') {
 					newTitles.push(this.name);
-					newHTML += "<div class='tv-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
+					newHTML += "<div class='poster tv-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
 				}
 				else {
 					newTitles.push(this.title);
-					newHTML += "<div class='movie-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
+					newHTML += "<div class='poster movie-poster ";
+					for (i=0; i<this.genre_ids.length; i++) {
+						var currID = this.genre_ids[i];
+						newHTML += genres[currID] + ' ';
+					}
+					newHTML += "col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
 				}
 			});
 			$('#poster-grid').html(newHTML);
@@ -118,20 +123,25 @@ $(document).ready(function(){
 		  name: 'newTitles',
 		  source: substringMatcher(newTitles)
 		});
+		
+		// destroy old isotope instance
 
-		if (searchOption == 'person') {
+		// create new isotope instance
+		/* if (searchOption == 'person') {
 			getIsotope('.person-profile');
 		} else if (searchOption == 'tv') {
 			getIsotope('.tv-poster');
 		} else {
 			getIsotope('.movie-poster');
-		}
+			console.log('i created a new isotope');
+		} */
 
+		// prevent page from reloading on enter
 		event.preventDefault();
 	});
 
 	function getIsotope(selector) {
-		var $grid = $('#poster-grid').isotope({
+		$grid = $('#poster-grid').isotope({
 			itemSelector: selector,
 			layoutMode: 'fitRows'
 		});
