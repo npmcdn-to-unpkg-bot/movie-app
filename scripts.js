@@ -1,4 +1,5 @@
 $(document).ready(function(){
+	var $grid = '';
 	var titles = [];
 	var imgBaseURL;
 	var baseURL = "https://api.themoviedb.org/3/";
@@ -11,30 +12,76 @@ $(document).ready(function(){
 		imgBaseURL = configData.images.base_url;
 	});
 
-	// add an initial set of 'now playing' movies to the poster grid
-	
+	// get a list of genres from movie genre list endpoint
+	var genres = [];
+	var genreURL = baseURL + 'genre/movie/list' + apiKey;
+	$.getJSON(genreURL, function(genreData) {
+		var newHTML = '';
+		$(genreData.genres).each(function(){
+			// make a filter button for each genre name
+			var genreID = this.id;
+			var genreName = this.name;
+			newHTML += '<input id="' + genreName.toLowerCase() + '-filter" type="button" class="btn btn-default genre-btn" value="' + genreName + '">';
+			// add genre names and IDs to an array for correlation purposes later
+			genres[genreID] = genreName;
+		});
+		$('#genre-filters').html(newHTML);
+	});
+
+	// start off with a set of now playing movies until search is used
 	$.getJSON(nowPlaying, function(movieData) {
 		var newHTML = '';
 		$(movieData.results).each(function(){
 			var currentPoster = imgBaseURL + 'w300' + this.poster_path;
 			titles.push(this.title);
-			newHTML += '<div class="col-sm-3"><img src="' + currentPoster + '">' + '</div>';
+			newHTML += '<div class="poster now-playing ';
+			// add genre classes to each poster
+			for (i=0; i<this.genre_ids.length; i++) {
+				var currID = this.genre_ids[i];
+				newHTML += genres[currID] + ' ';
+			}
+			newHTML += 'col-sm-3"><img src="' + currentPoster + '">' + '</div>';
 		});
+
 		$('#poster-grid').html(newHTML);
+
+		// initialize typeahead and isotope once we have some movies to work with
+		getTypeahead();
+		getIsotope('.poster');
+
+		// add event listener on genre buttons
+		$('.genre-btn').click(function() {
+			// get rid of old filters
+			$grid.isotope({ filter: '*' });
+			// tell isotope that the posters may have changed since it was last loaded
+			$grid.isotope('reloadItems')
+			// then apply the filter
+			var thisGenre = $(this).val();
+			$grid.isotope({ filter: '.' + thisGenre })
+		});
 	});
 
 	// search all the movies via typeahead...
 	// add event listener on keyup event that sends what you have typed into the AXAJ call
-	/* var searchAllURL = baseURL + "search/keyword" + apiKey + "&query=" + "&page=1";
-	console.log(searchAllURL);
-	$.getJSON(searchAllURL, function(allData) {
-		$(allData.results).each(function(){
-			allTitles.push(this.title);
+	/* $('#search-str').keyup(function(){
+		var mySearchString = $('#search-str').val();
+		var searchAllURL = baseURL + "search/keyword" + apiKey + "&query=" + mySearchString + "&page=1";
+		console.log(searchAllURL);
+		$.getJSON(searchAllURL, function(allData) {
+			$(allData.results).each(function(){
+				allTitles.push(this.title);
+			});
 		});
 	}); */
 
-	// pull up a specific movie poster upon clicking the search button
-	$('#search').submit(function(){
+	/* $('#comedy-filter').click(function(){
+		$('#poster-grid').isotope({ filter: '.genre35' })
+	}); */
+
+	// pull up a specific movie poster upon clicking the search button;
+	// you could also run all of this stuff when the search option changes;
+	// use $('#search-by').change(function()...)
+	$('#search-form').submit(function(){
 		// first get the search option (movie/tv/person) from select element
 		var searchOption = $('#search-by option:selected').val();
 		var newTitles = [];
@@ -46,13 +93,19 @@ $(document).ready(function(){
 			$(titleData.results).each(function(){
 				if (searchOption == 'person') {
 					newTitles.push(this.name);
-					newHTML += "<div class='movie-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.profile_path + "'></div>";
+					newHTML += "<div class='poster person-profile col-sm-3'><img src=" + imgBaseURL + "w300" + this.profile_path + "'></div>";
 				} else if (searchOption == 'tv') {
 					newTitles.push(this.name);
-					newHTML += "<div class='movie-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
-				} else {
+					newHTML += "<div class='poster tv-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
+				}
+				else {
 					newTitles.push(this.title);
-					newHTML += "<div class='movie-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
+					newHTML += "<div class='poster movie-poster ";
+					for (i=0; i<this.genre_ids.length; i++) {
+						var currID = this.genre_ids[i];
+						newHTML += genres[currID] + ' ';
+					}
+					newHTML += "col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
 				}
 			});
 			$('#poster-grid').html(newHTML);
@@ -70,9 +123,33 @@ $(document).ready(function(){
 		  name: 'newTitles',
 		  source: substringMatcher(newTitles)
 		});
+		
+		// destroy old isotope instance
 
+		// create new isotope instance
+		/* if (searchOption == 'person') {
+			getIsotope('.person-profile');
+		} else if (searchOption == 'tv') {
+			getIsotope('.tv-poster');
+		} else {
+			getIsotope('.movie-poster');
+			console.log('i created a new isotope');
+		} */
+
+		// prevent page from reloading on enter
 		event.preventDefault();
 	});
+
+	function getIsotope(selector) {
+		$grid = $('#poster-grid').isotope({
+			itemSelector: selector,
+			layoutMode: 'fitRows'
+		});
+		// layout Isotope after each image loads
+		$grid.imagesLoaded().progress( function() {
+		  $grid.isotope('layout');
+		});
+	}
 
 	// this is typeahead.js stuff
 	var substringMatcher = function(strs) {
@@ -93,15 +170,16 @@ $(document).ready(function(){
 	  };
 	};
 
-	// initialize typeahead
-	$('.typeahead').typeahead({
-	  hint: true,
-	  highlight: true,
-	  minLength: 1
-	},
-	{
-	  name: 'titles',
-	  source: substringMatcher(titles)
-	});
+	function getTypeahead() {
+		$('.typeahead').typeahead({
+		  hint: true,
+		  highlight: true,
+		  minLength: 2
+		},
+		{
+		  name: 'titles',
+		  source: substringMatcher(titles)
+		});
+	}
 
 });
