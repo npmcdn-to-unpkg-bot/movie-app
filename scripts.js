@@ -1,6 +1,9 @@
 $(document).ready(function(){
 	var $grid = '';
 	var titles = [];
+	var genres = [];
+	var movieGenres = [];
+	var tvGenres = [];
 	var imgBaseURL;
 	var baseURL = "https://api.themoviedb.org/3/";
 	var apiKey = "?api_key=d12bfdc8bddc77fe1e499841895aec15";
@@ -12,21 +15,20 @@ $(document).ready(function(){
 		imgBaseURL = configData.images.base_url;
 	});
 
-	// get a list of genres from movie genre list endpoint
-	var genres = [];
+	// get a list of movie genres from movie genre list endpoint
 	var genreURL = baseURL + 'genre/movie/list' + apiKey;
-	$.getJSON(genreURL, function(genreData) {
-		var newHTML = '';
-		$(genreData.genres).each(function(){
-			// make a filter button for each genre name
-			var genreID = this.id;
-			var genreName = this.name;
-			newHTML += '<input id="' + genreName.toLowerCase() + '-filter" type="button" class="btn btn-default genre-btn" value="' + genreName + '">';
-			// add genre names and IDs to an array for correlation purposes later
-			genres[genreID] = genreName;
+		$.getJSON(genreURL, function(genreData) {
+			var newHTML = '';
+			$(genreData.genres).each(function(){
+				// make a filter button for each genre name
+				var genreID = this.id;
+				var genreName = this.name;
+				newHTML += '<input id="' + genreName.toLowerCase() + '-filter" type="button" class="btn btn-default genre-btn" value="' + genreName + '">';
+				// add genre names and IDs to an array for correlation purposes later
+				genres[genreID] = genreName;
+			});
+			$('#genre-filters').html(newHTML);
 		});
-		$('#genre-filters').html(newHTML);
-	});
 
 	// start off with a set of now playing movies until search is used
 	$.getJSON(nowPlaying, function(movieData) {
@@ -74,16 +76,13 @@ $(document).ready(function(){
 		});
 	}); */
 
-	/* $('#comedy-filter').click(function(){
-		$('#poster-grid').isotope({ filter: '.genre35' })
-	}); */
-
 	// pull up a specific movie poster upon clicking the search button;
 	// you could also run all of this stuff when the search option changes;
 	// use $('#search-by').change(function()...)
 	$('#search-form').submit(function(){
 		// first get the search option (movie/tv/person) from select element
 		var searchOption = $('#search-by option:selected').val();
+		console.log(searchOption);
 		var newTitles = [];
 		var searchTitle = $('#search-str').val();
 		var titleURL = baseURL + 'search/' + searchOption + apiKey + '&query=' + encodeURI(searchTitle) + '&page=1';
@@ -98,9 +97,13 @@ $(document).ready(function(){
 				} else if (searchOption == 'tv') {
 					$('#info').html("TV Shows");
 					newTitles.push(this.name);
-					newHTML += "<div class='poster tv-poster col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
-				}
-				else {
+					newHTML += "<div class='poster tv-poster "
+						for (i=0; i<this.genre_ids.length; i++) {
+							var currID = this.genre_ids[i];
+							newHTML += genres[currID] + ' ';
+						}
+					newHTML += "col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
+				} else if (searchOption == 'movie') {
 					$('#info').html("Movies");
 					newTitles.push(this.title);
 					newHTML += "<div class='poster movie-poster ";
@@ -109,6 +112,28 @@ $(document).ready(function(){
 						newHTML += genres[currID] + ' ';
 					}
 					newHTML += "col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
+				} else {
+					$('#info').html("Multi-search");
+					if (this.media_type == 'person') {
+						newTitles.push(this.name);
+						newHTML += "<div class='poster person-profile col-sm-3'><img src=" + imgBaseURL + "w300" + this.profile_path + "'></div>";
+					} else if (this.media_type == 'tv') {
+						newTitles.push(this.name);
+						newHTML += "<div class='poster tv-poster "
+						for (i=0; i<this.genre_ids.length; i++) {
+							var currID = this.genre_ids[i];
+							newHTML += genres[currID] + ' ';
+						}
+						newHTML += "col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
+					} else {
+						newTitles.push(this.title);
+						newHTML += "<div class='poster movie-poster ";
+						for (i=0; i<this.genre_ids.length; i++) {
+							var currID = this.genre_ids[i];
+							newHTML += genres[currID] + ' ';
+						}
+						newHTML += "col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
+					}
 				}
 			});
 			$('#poster-grid').html(newHTML);
