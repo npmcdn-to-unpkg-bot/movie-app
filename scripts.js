@@ -2,8 +2,8 @@ $(document).ready(function(){
 	var $grid = '';
 	var titles = [];
 	var genres = [];
-	var movieGenres = [];
-	var tvGenres = [];
+	//var movieGenres = [];
+	//var tvGenres = [];
 	var imgBaseURL;
 	var baseURL = "https://api.themoviedb.org/3/";
 	var apiKey = "?api_key=d12bfdc8bddc77fe1e499841895aec15";
@@ -48,7 +48,7 @@ $(document).ready(function(){
 		$('#poster-grid').html(newHTML);
 
 		// initialize typeahead and isotope once we have some movies to work with
-		getTypeahead();
+		getTypeahead('titles', titles);
 		getIsotope();
 
 		// add event listener on genre buttons
@@ -77,8 +77,7 @@ $(document).ready(function(){
 	}); */
 
 	// pull up a specific movie poster upon clicking the search button;
-	// you could also run all of this stuff when the search option changes;
-	// use $('#search-by').change(function()...)
+	// you could also run all of this stuff when the search option changes using $('#search-by').change(function()...)
 	$('#search-form').submit(function(){
 		// first get the search option (movie/tv/person) from select element
 		var searchOption = $('#search-by option:selected').val();
@@ -142,16 +141,7 @@ $(document).ready(function(){
 		// kill the old typeahead instance because it has 'now playing' titles
 		$('.typeahead').typeahead('destroy');
 		// initialize typeahead again with the new titles
-		$('.typeahead').typeahead({
-		  hint: true,
-		  highlight: true,
-		  minLength: 1
-		},
-		{
-		  name: 'newTitles',
-		  source: substringMatcher(newTitles)
-		});
-	
+		getTypeahead('newTitles', newTitles);
 		// prevent page from reloading on return or enter
 		event.preventDefault();
 	});
@@ -159,7 +149,7 @@ $(document).ready(function(){
 	function getIsotope() {
 		$grid = $('#poster-grid').isotope({
 			itemSelector: '.poster',
-			layoutMode: 'masonry'
+			layoutMode: 'fitRows'
 		});
 		// layout Isotope after each image loads
 		$grid.imagesLoaded().progress( function() {
@@ -186,15 +176,15 @@ $(document).ready(function(){
 	  };
 	};
 
-	function getTypeahead() {
+	function getTypeahead(newName, titleArr) {
 		$('.typeahead').typeahead({
 		  hint: true,
 		  highlight: true,
 		  minLength: 2
 		},
 		{
-		  name: 'titles',
-		  source: substringMatcher(titles)
+		  name: newName,
+		  source: substringMatcher(titleArr)
 		});
 	}
 
