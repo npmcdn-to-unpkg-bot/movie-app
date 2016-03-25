@@ -23,9 +23,11 @@ $(document).ready(function(){
 				// make a filter button for each genre name
 				var genreID = this.id;
 				var genreName = this.name;
-				newHTML += '<input id="' + genreName.toLowerCase() + '-filter" type="button" class="btn btn-default genre-btn" value="' + genreName + '">';
+				// remove spaces from genre names
+				var safeGenreName = genreName.replace(/ /g, "");
+				newHTML += '<input id="' + safeGenreName.toLowerCase() + '" type="button" class="btn btn-default genre-btn" value="' + genreName + '">';
 				// add genre names and IDs to an array for correlation purposes later
-				genres[genreID] = genreName;
+				genres[genreID] = safeGenreName.toLowerCase();
 			});
 			$('#genre-filters').html(newHTML);
 		});
@@ -37,7 +39,7 @@ $(document).ready(function(){
 			var currentPoster = imgBaseURL + 'w300' + this.poster_path;
 			titles.push(this.title);
 			newHTML += '<div class="poster now-playing ';
-			// add genre classes to each poster
+			// loop through all genres associated with each movie
 			for (i=0; i<this.genre_ids.length; i++) {
 				var currID = this.genre_ids[i];
 				newHTML += genres[currID] + ' ';
@@ -58,8 +60,10 @@ $(document).ready(function(){
 			// tell isotope that the posters may have changed since it was last loaded
 			$grid.isotope('reloadItems')
 			// then apply the filter
-			var thisGenre = $(this).val();
-			$grid.isotope({ filter: '.' + thisGenre })
+			var thisGenre = $(this).attr('id');
+			var thisGenreClass = '.' + thisGenre + '';
+			console.log(thisGenreClass);
+			$grid.isotope({ filter: thisGenreClass})
 		});
 	});
 
