@@ -8,6 +8,6 @@ TODO: add modal popups with summary info when poster images are clicked.
 
 See [themoviedb.org](http://docs.themoviedb.apiary.io/) for API information.
 
-## [Demo here](http://www.kdavidmoore.com/movies)
+## [Demo here](http://www.kdavidmoore.com/movie-crawler)
 
 [I learned this at DigitalCrafts](https://www.digitalcrafts.com)
