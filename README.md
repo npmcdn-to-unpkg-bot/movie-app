@@ -8,7 +8,6 @@ TODO: add modal popups with summary info when poster images are clicked.
 
 See [themoviedb.org](http://docs.themoviedb.apiary.io/) for API information.
 
-## Demo here
-Link to portfolio.
+## [Demo here](http://www.kdavidmoore.com/panama-papers)
 
 [I learned this at DigitalCrafts](https://www.digitalcrafts.com)
