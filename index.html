@@ -8,40 +8,68 @@
 
 <body>
 
-<div class="container">
+<div class="container-fluid header">
 	<div class="row">
 		<div class="col-sm-12 text-center">
-			<form id="search-form" class="form-inline">
-				<div class="form-group">
-					<div class="input-group">
-						<input id="search-str" type="text" class="form-control typeahead" placeholder="Search for a&hellip;">
+			<h1>Movie Crawler</h1>
+		</div>
+	</div>
+</div>
+
+<div class="content-wrapper">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12 text-center">
+				<form id="search-form" class="form-inline">
+					<div class="form-group">
+						<div class="input-group">
+							<input id="search-str" type="text" class="form-control typeahead" placeholder="Search for a&hellip;">
+						</div>
+						<select id="search-by" class="form-control">
+							<option option="selected" value="movie">Movie</option>
+							<option value="tv">TV Show</option>
+							<option value="person">Person</option>
+							<option value="multi">All</option>
+						</select>
+						<input type="submit" class="btn btn-primary" value="Search">
 					</div>
-					<select id="search-by" class="form-control">
-						<option option="selected" value="movie">Movie</option>
-						<option value="tv">TV Show</option>
-						<option value="person">Person</option>
-						<option value="multi">All</option>
-					</select>
-					<input type="submit" class="btn btn-primary" value="Search">
+				</form>
+			</div>
+		</div>
+		<div class="row">
+			<div id="genre-filters" class="col-sm-12 text-center">
+				<!-- placeholder -->
+			</div>
+		</div>
+		<div class="row">
+			<div id="page-heading" class="col-sm-12">
+				<h1 id="info">Now Playing</h1>
+			</div>
+		</div>
+		<div class="row">
+			<div id="poster-grid" class="col-sm-12">
+				<!-- placeholder -->
+			</div>
+		</div>
+	</div> 
+
+	<div class="modal fade" id="movieModal" tabindex="-1" role="dialog" aria-labelledby="movieModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="movieModalLabel">Modal title</h4>
 				</div>
-			</form>
+				<div class="modal-body">
+					<!-- movie info goes here -->
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+			</div>
 		</div>
 	</div>
-	<div class="row">
-		<div id="genre-filters" class="col-sm-12 text-center">
-			<!-- placeholder -->
-		</div>
-	</div>
-	<div class="row">
-		<div id="page-heading" class="col-sm-12">
-			<h1 id="info">Now Playing</h1>
-		</div>
-	</div>
-	<div class="row">
-		<div id="poster-grid" class="col-sm-12">
-			<!-- placeholder -->
-		</div>
-	</div>
+
 </div>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 	<!-- Latest compiled and minified JavaScript -->
