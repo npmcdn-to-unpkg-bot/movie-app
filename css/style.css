@@ -1,53 +1,52 @@
-/* line 1, ../compass/sass/style.scss */
+/* line 1, ../compass/sass/_head.scss */
+body {
+  color: #424242;
+}
+
+/* line 5, ../compass/sass/_head.scss */
 .header {
   background-color: #801515;
   color: #fff;
   padding-bottom: 10px;
 }
 
-/* line 7, ../compass/sass/style.scss */
+/* line 1, ../compass/sass/_gallery.scss */
 .content-wrapper {
   background-color: #fafafa;
   padding-top: 10px;
 }
 
-/* line 12, ../compass/sass/style.scss */
-body {
-  color: #424242;
-}
-
-/* line 16, ../compass/sass/style.scss */
+/* line 6, ../compass/sass/_gallery.scss */
 #poster-grid img {
   width: 100%;
 }
 
-/* line 20, ../compass/sass/style.scss */
+/* line 10, ../compass/sass/_gallery.scss */
 .col-sm-3 {
   width: 23%;
 }
 
-/* line 24, ../compass/sass/style.scss */
+/* line 14, ../compass/sass/_gallery.scss */
 #genre-filters input {
   margin: 5px;
 }
 
-/* line 28, ../compass/sass/style.scss */
+/* line 18, ../compass/sass/_gallery.scss */
 .poster img {
   padding-bottom: 10px;
 }
 
-/* typeahead styling below */
-/* line 33, ../compass/sass/style.scss */
+/* line 1, ../compass/sass/_typeahead.scss */
 .tt-input, .tt-hint {
   margin-top: 5px;
 }
 
-/* line 37, ../compass/sass/style.scss */
+/* line 5, ../compass/sass/_typeahead.scss */
 .tt-hint {
   color: #999;
 }
 
-/* line 41, ../compass/sass/style.scss */
+/* line 9, ../compass/sass/_typeahead.scss */
 .tt-menu {
   width: 422px;
   margin-top: 12px;
@@ -59,7 +58,7 @@ body {
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* line 52, ../compass/sass/style.scss */
+/* line 20, ../compass/sass/_typeahead.scss */
 .tt-suggestion {
   padding: 3px 20px;
   font-size: 18px;
