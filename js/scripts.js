@@ -50,23 +50,7 @@ $(document).ready(function(){
 
 		$('.poster').click(function(){
 			var posterClickedName = $(this).attr('name');
-			var titleURL = baseURL + 'search/multi' + apiKey + '&query=' + encodeURI(posterClickedName) + '&page=1';
-			
-			$.getJSON(titleURL, function(titleData){
-				var overview = titleData.results[0].overview;
-				var vote = titleData.results[0].vote_average;
-				var mediaType = titleData.results[0].media_type;
-				var genre_ids = titleData.results[0].genre_ids;
-				var genreHTML = '';
-				for (i=0; i<genre_ids.length; i++) {
-					var currID = genre_ids[i];
-					genreHTML += genres[currID] + ', ';
-				}
-				genreHTML = genreHTML.slice(0, -2);
-				$('.modal-title').html(posterClickedName);
-				$('.modal-body').html('<p>' + overview + '</p>' + '<p>Media type: ' + mediaType + '</p>'
-					+ '<p>Genres: ' + genreHTML + '</p>' + '<p>Rating: ' + vote + '/10</p>');
-			});
+			populateModal(posterClickedName);
 		});
 
 		// initialize typeahead and isotope once we have some movies to work with
@@ -116,50 +100,56 @@ $(document).ready(function(){
 				if (searchOption == 'person') {
 					$('#info').html("Persons of Interest");
 					newTitles.push(this.name);
-					newHTML += "<div class='poster person-profile col-sm-3'><img src=" + imgBaseURL + "w300" + this.profile_path + "'></div>";
+					newHTML += '<div class="poster person-profile col-sm-3"><img src="' + imgBaseURL + 'w300' + this.profile_path + '"></div>';
 				} else if (searchOption == 'tv') {
 					$('#info').html("TV Shows");
 					newTitles.push(this.name);
-					newHTML += "<div class='poster tv-poster "
+					newHTML += '<div data-toggle="modal" data-target="#modal" name="' + this.title + '" class="poster tv-poster ';
 						for (i=0; i<this.genre_ids.length; i++) {
 							var currID = this.genre_ids[i];
 							newHTML += genres[currID] + ' ';
 						}
-					newHTML += "col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
+					newHTML += 'col-sm-3"><img src="' + imgBaseURL + 'w300' + this.poster_path + '"></div>';
 				} else if (searchOption == 'movie') {
 					$('#info').html("Movies");
 					newTitles.push(this.title);
-					newHTML += "<div class='poster movie-poster ";
+					newHTML += '<div  data-toggle="modal" data-target="#modal" name="' + this.title + '" class="poster movie-poster ';
 					for (i=0; i<this.genre_ids.length; i++) {
 						var currID = this.genre_ids[i];
 						newHTML += genres[currID] + ' ';
 					}
-					newHTML += "col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
+					newHTML += 'col-sm-3"><img src="' + imgBaseURL + 'w300' + this.poster_path + '"></div>';
 				} else {
 					$('#info').html("Multi-search");
 					if (this.media_type == 'person') {
 						newTitles.push(this.name);
-						newHTML += "<div class='poster person-profile col-sm-3'><img src=" + imgBaseURL + "w300" + this.profile_path + "'></div>";
+						newHTML += '<div class="poster person-profile col-sm-3"><img src="' + imgBaseURL + 'w300' + this.profile_path + '"></div>';
 					} else if (this.media_type == 'tv') {
 						newTitles.push(this.name);
-						newHTML += "<div class='poster tv-poster "
+						newHTML += '<div  data-toggle="modal" data-target="#modal" name="' + this.title + '" class="poster tv-poster ';
 						for (i=0; i<this.genre_ids.length; i++) {
 							var currID = this.genre_ids[i];
 							newHTML += genres[currID] + ' ';
 						}
-						newHTML += "col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
+						newHTML += 'col-sm-3"><img src="' + imgBaseURL + 'w300' + this.poster_path + '"></div>';
 					} else {
 						newTitles.push(this.title);
-						newHTML += "<div class='poster movie-poster ";
+						newHTML += '<div data-toggle="modal" data-target="#modal" name="' + this.title + '" class="poster movie-poster ';
 						for (i=0; i<this.genre_ids.length; i++) {
 							var currID = this.genre_ids[i];
 							newHTML += genres[currID] + ' ';
 						}
-						newHTML += "col-sm-3'><img src=" + imgBaseURL + "w300" + this.poster_path + "'></div>";
+						newHTML += 'col-sm-3"><img src="' + imgBaseURL + 'w300' + this.poster_path + '"></div>';
 					}
 				}
 			});
+
 			$('#poster-grid').html(newHTML);
+			
+			$('.poster').click(function(){
+				var posterClickedName = $(this).attr('name');
+				populateModal(posterClickedName);
+			});
 		});
 
 		// kill the old typeahead instance because it has 'now playing' titles
@@ -169,6 +159,25 @@ $(document).ready(function(){
 		// prevent page from reloading on return or enter
 		event.preventDefault();
 	});
+
+	function populateModal(posterClickedName){
+		var titleURL = baseURL + 'search/multi' + apiKey + '&query=' + encodeURI(posterClickedName) + '&page=1';
+		$.getJSON(titleURL, function(titleData){
+			var overview = titleData.results[0].overview;
+			var vote = titleData.results[0].vote_average;
+			var mediaType = titleData.results[0].media_type;
+			var genre_ids = titleData.results[0].genre_ids;
+			var genreHTML = '';
+			for (i=0; i<genre_ids.length; i++) {
+				var currID = genre_ids[i];
+				genreHTML += genres[currID] + ', ';
+			}
+			genreHTML = genreHTML.slice(0, -2);
+			$('.modal-title').html(posterClickedName);
+			$('.modal-body').html('<p>' + overview + '</p>' + '<p>Media type: ' + mediaType + '</p>'
+				+ '<p>Genres: ' + genreHTML + '</p>' + '<p>Rating: ' + vote + '/10</p>');
+		});
+	}
 
 	function getIsotope() {
 		$grid = $('#poster-grid').isotope({
