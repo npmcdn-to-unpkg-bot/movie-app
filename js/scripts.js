@@ -54,8 +54,18 @@ $(document).ready(function(){
 			
 			$.getJSON(titleURL, function(titleData){
 				var overview = titleData.results[0].overview;
+				var vote = titleData.results[0].vote_average;
+				var mediaType = titleData.results[0].media_type;
+				var genre_ids = titleData.results[0].genre_ids;
+				var genreHTML = '';
+				for (i=0; i<genre_ids.length; i++) {
+					var currID = genre_ids[i];
+					genreHTML += genres[currID] + ', ';
+				}
+				genreHTML = genreHTML.slice(0, -2);
 				$('.modal-title').html(posterClickedName);
-				$('.modal-body').html('<p>' + overview + '</p>');
+				$('.modal-body').html('<p>' + overview + '</p>' + '<p>Media type: ' + mediaType + '</p>'
+					+ '<p>Genres: ' + genreHTML + '</p>' + '<p>Rating: ' + vote + '/10</p>');
 			});
 		});
 
