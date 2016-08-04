@@ -6,7 +6,6 @@ $(document).ready(function(){
 	//var tvGenres = [];
 	var imgBaseURL;
 	var baseURL = "https://api.themoviedb.org/3/";
-	var apiKey = "?api_key=d12bfdc8bddc77fe1e499841895aec15";
 	var configURL = baseURL + 'configuration' + apiKey;
 	var nowPlaying = baseURL + 'movie/now_playing' + apiKey;
 
@@ -17,20 +16,20 @@ $(document).ready(function(){
 
 	// get a list of movie genres from movie genre list endpoint
 	var genreURL = baseURL + 'genre/movie/list' + apiKey;
-		$.getJSON(genreURL, function(genreData) {
-			var newHTML = '';
-			$(genreData.genres).each(function(){
-				// make a filter button for each genre name
-				var genreID = this.id;
-				var genreName = this.name;
-				// remove spaces from genre names
-				var safeGenreName = genreName.replace(/ /g, "");
-				newHTML += '<input id="' + safeGenreName.toLowerCase() + '" type="button" class="btn btn-default genre-btn" value="' + genreName + '">';
-				// add genre names and IDs to an array for correlation purposes later
-				genres[genreID] = safeGenreName.toLowerCase();
-			});
-			$('#genre-filters').html(newHTML);
+	$.getJSON(genreURL, function(genreData) {
+		var newHTML = '';
+		$(genreData.genres).each(function(){
+			// make a filter button for each genre name
+			var genreID = this.id;
+			var genreName = this.name;
+			// remove spaces from genre names
+			var safeGenreName = genreName.replace(/ /g, "");
+			newHTML += '<input id="' + safeGenreName.toLowerCase() + '" type="button" class="btn btn-default genre-btn" value="' + genreName + '">';
+			// add genre names and IDs to an array for correlation purposes later
+			genres[genreID] = safeGenreName.toLowerCase();
 		});
+		$('#genre-filters').html(newHTML);
+	});
 
 	// start off with a set of now playing movies until search is used
 	$.getJSON(nowPlaying, function(movieData) {
@@ -38,7 +37,7 @@ $(document).ready(function(){
 		$(movieData.results).each(function(){
 			var currentPoster = imgBaseURL + 'w300' + this.poster_path;
 			titles.push(this.title);
-			newHTML += '<div class="poster now-playing ';
+			newHTML += '<div data-toggle="modal" data-target="#modal" name="' + this.title + '" class="poster now-playing ';
 			// loop through all genres associated with each movie
 			for (i=0; i<this.genre_ids.length; i++) {
 				var currID = this.genre_ids[i];
@@ -49,6 +48,17 @@ $(document).ready(function(){
 
 		$('#poster-grid').html(newHTML);
 
+		$('.poster').click(function(){
+			var posterClickedName = $(this).attr('name');
+			var titleURL = baseURL + 'search/multi' + apiKey + '&query=' + encodeURI(posterClickedName) + '&page=1';
+			
+			$.getJSON(titleURL, function(titleData){
+				var overview = titleData.results[0].overview;
+				$('.modal-title').html(posterClickedName);
+				$('.modal-body').html('<p>' + overview + '</p>');
+			});
+		});
+
 		// initialize typeahead and isotope once we have some movies to work with
 		getTypeahead('titles', titles);
 		getIsotope();
@@ -58,12 +68,12 @@ $(document).ready(function(){
 			// get rid of old filters
 			$grid.isotope({ filter: '*' });
 			// tell isotope that the posters may have changed since it was last loaded
-			$grid.isotope('reloadItems')
+			$grid.isotope('reloadItems');
 			// then apply the filter
 			var thisGenre = $(this).attr('id');
 			var thisGenreClass = '.' + thisGenre + '';
 			console.log(thisGenreClass);
-			$grid.isotope({ filter: thisGenreClass})
+			$grid.isotope({ filter: thisGenreClass });
 		});
 	});
 
@@ -156,7 +166,7 @@ $(document).ready(function(){
 			layoutMode: 'fitRows'
 		});
 		// layout Isotope after each image loads
-		$grid.imagesLoaded().progress( function() {
+		$grid.imagesLoaded().progress(function() {
 			$grid.isotope('layout');
 		});
 	}
@@ -164,20 +174,20 @@ $(document).ready(function(){
 	// this is typeahead.js stuff
 	var substringMatcher = function(strs) {
 		return function findMatches(q, cb) {
-	    var matches, substringRegex;
-	    // an array that will be populated with substring matches
-	    matches = [];
-	    // regex used to determine if a string contains the substring `q`
-	    substrRegex = new RegExp(q, 'i');
-	    // iterate through the pool of strings and for any string that
-	    // contains the substring `q`, add it to the `matches` array
-	    $.each(strs, function(i, str) {
-	      if (substrRegex.test(str)) {
-	        matches.push(str);
-	      }
-	    });
-	    cb(matches);
-	  };
+			var matches, substringRegex;
+			// an array that will be populated with substring matches
+			matches = [];
+			// regex used to determine if a string contains the substring `q`
+			substrRegex = new RegExp(q, 'i');
+			// iterate through the pool of strings and for any string that
+			// contains the substring `q`, add it to the `matches` array
+			$.each(strs, function(i, str) {
+				if (substrRegex.test(str)) {
+					matches.push(str);
+				}
+			});
+			cb(matches);
+		};
 	};
 
 	function getTypeahead(newName, titleArr) {

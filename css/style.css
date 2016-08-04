@@ -36,6 +36,11 @@ body {
   padding-bottom: 10px;
 }
 
+/* line 22, ../compass/sass/_gallery.scss */
+.poster:hover {
+  cursor: pointer;
+}
+
 /* line 1, ../compass/sass/_typeahead.scss */
 .tt-input, .tt-hint {
   margin-top: 5px;
